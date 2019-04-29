@@ -14,7 +14,7 @@ class App extends Component {
 
   performSearch(searchTerm) {
     console.log("Perform search using moviedb");
-    const api_key = "783bf1ea447bb62fbc20506d87e7a9b6";
+    const api_key = "It should be your api key";
     const urlString = `https://api.themoviedb.org/3/search/movie?query=marvel&api_key=${api_key}&query=${searchTerm}`;
     $.ajax({
       url: urlString,

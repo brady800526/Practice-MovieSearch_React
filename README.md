@@ -1,68 +1,127 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Overview
 
-## Available Scripts
+This repo is a practice of using Javascript React Framework with ajax to build a movies search platform.
+When user type in the name of the movie, the movies results is showed on change.
 
-In the project directory, you can run:
+_All the step is followed by [youtube channel](https://www.youtube.com/watch?v=bqSSLr8A8PU) created by Lets Build That App._
 
-### `npm start`
+## Goal
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+This app includes three steps
 
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
+- Search movies by input
+- Ajax request to get all movies
+- Put the result on MovieRow componet
 
-### `npm test`
+## Pages
 
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+<figure style="text-align: center;">
+    <img src="README_img/LandingPage.png" alt="The architecture of this app" style="width: 100%; height: 100%"/>
+    <figcaption style="display: block;">Landing Page</figcaption>
+</figure>
 
-### `npm run build`
+By input the search above, you can get the results from that.
 
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Usage
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+Download the repo, and under the directory:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+    npm install
 
-### `npm run eject`
+and config your api key of [Movie api](https://developers.themoviedb.org/3/search/search-movies).
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+    npm start
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+It will direct open the page with default 3000 port
 
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+## Code
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+#### Input search
 
-## Learn More
+```
+<input
+    onChange={this.searchChangeHandler.bind(this)}
+    placeholder="Enter search term"
+/>
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+When there is a input change, will trigger the searchChangeHandler function. We have to bind searchChangeHandler to self otherwise the searchChangeHandler will refer to function scope.
 
-### Code Splitting
+#### searchChangeHandler
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
+```
+searchChangeHandler(event) {
+    const boundObjet = this;
+    const searchTerm = event.target.value;
+    boundObjet.performSearch(searchTerm);
+  }
+```
 
-### Analyzing the Bundle Size
+When this functions is triggered, it will use performSearch function.
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
+```
 
-### Making a Progressive Web App
+performSearch(searchTerm) {
+    const api_key = "It should be your api key";
+    const urlString = `https://api.themoviedb.org/3/search/movie?query=marvel&api_key=${api_key}&query=${searchTerm}`;
+    $.ajax({
+      url: urlString,
+      success: (searchResults) => {
+        const results = searchResults.results;
+        console.log(results[0]);
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
+        var movieRows = [];
 
-### Advanced Configuration
+        results.forEach((movie) => {
+          movie.poster_src =
+            "https://image.tmdb.org/t/p/w185" + movie.poster_path;
+          // console.log(movie.poster_path);
+          const movieRow = <MovieRow key={movie.id} movie={movie} />;
+          movieRows.push(movieRow);
+        });
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
+        this.setState({rows: movieRows});
+      }
+    });
+  }
+```
 
-### Deployment
+Depends on the search result, use ajax request to query the movie search results and callback to the results array and update the state of the app.
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
+#### Movie Row Component
 
-### `npm run build` fails to minify
+```
+class MovieRow extends React.Component {
+  render() {
+    return (
+      <div>
+        <table key={this.props.movie.id}>
+          <tbody>
+            <tr>
+              <td>
+                <img alt="" width="120" src={this.props.movie.poster_src} />
+              </td>
+              <td>
+                <h3>{this.props.movie.title}</h3>
+                <p>{this.props.movie.overview}</p>
+                <input
+                  type="button"
+                  onClick={this.viewMovie.bind(this)}
+                  value="View"
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+}
+```
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+The row component will update the content by the props.
+
+## Conclusion
+
+In this project, we connect MySQL with guestbook page. Save each comment when guest leaving the comment on the sign up page. Finally, show all the comments on the landing page.
